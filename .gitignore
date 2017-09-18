@@ -62,3 +62,6 @@ target/
 .ipynb_checkpoints
 
 .idea
+
+#Private information
+privateInfo.py

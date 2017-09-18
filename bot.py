@@ -1,12 +1,10 @@
 ﻿import korbit
 import time
-
+import privateInfo
 publicAPI = korbit.PublicAPI()
-
-
-
-privateAPI = korbit.PrivateAPI(client_id='',  #Key
-                        secret='')    #Secret
+myID = privateInfo.myID()
+privateAPI = korbit.PrivateAPI(client_id=myID.key,  #Key
+                        secret=myID.secret)    #Secret
 '''
 코빗 사이트 로그인
 '''
@@ -16,8 +14,8 @@ privateAPI = korbit.PrivateAPI(client_id='',  #Key
 # 매번 아이디와 비밀번호를 입력하는 수고를 덜어준다.
 # 1시간후 자동 로그아웃됨 ( Access Token이 만료됨)
 # Access Token 만료 전 Refresh Token을 이용하여 Access Token을 갱신할 수 있음
-privateAPI.create_token_directly(username='',
-                                 password='')
+privateAPI.create_token_directly(username=myID.username,
+                                 password=myID.password)
 # 사용자 정보 가져오기
 myInfo = privateAPI.get_user_info()
 print(myInfo)
