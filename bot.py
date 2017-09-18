@@ -1,8 +1,11 @@
 ﻿import korbit
 import time
 import privateInfo
+import timeHelper
+
 publicAPI = korbit.PublicAPI()
 myID = privateInfo.myID()
+
 privateAPI = korbit.PrivateAPI(client_id=myID.key,  #Key
                         secret=myID.secret)    #Secret
 '''
@@ -20,25 +23,16 @@ privateAPI.create_token_directly(username=myID.username,
 myInfo = privateAPI.get_user_info()
 print(myInfo)
 
-prevTime = time.mktime(time.localtime())
-timeConnected = 0
-bidOrderCount=0
-while True:
-    localTime = time.localtime()
-    localTime_printable = "[{}.{}.{} | {}:{}]".format(localTime.tm_year, localTime.tm_mon, localTime.tm_mday, localTime.tm_hour, localTime.tm_sec)
-    nowTime = time.mktime(localTime)
-    timeDiff = nowTime - prevTime
-    prevTime = nowTime
-    timeConnected += timeDiff
-    if timeConnected % 600 == 0:
-        privateAPI.refresh_token()
-    time.sleep(1)
-    print(timeDiff)
-    if timeConnected % 3600*24 == 0: # 매일 1회 5000원 매수
+timeHelper = timeHelper.TimeHelper()
 
-        if bidOrderCount > 0:
-            status = privateAPI.bid_order(bid_type='market',fiat_amount=5000, currency_pair='btc_krw')
-            print(status)
-        bidOrderCount += 1
+while True:
+    timeHelper.tick()
+    if timeHelper.timeConnected() % 600 == 0:
+        privateAPI.refresh_token()
+    print(timeHelper.timeFromLastBidOrder())
+    if timeHelper.timeFromLastBidOrder() > 3600*24: # 매일 1회 5000원 매수
+        status = privateAPI.bid_order(bid_type='market',fiat_amount=5000, currency_pair='btc_krw')
+        timeHelper.record(ordertype='bid')
+        print(timeHelper.printableLocalTime() + ' Bid order | Price: ' + publicAPI.ticker()['last'] + 'KRW/BTC | Amount: 5000KRW')
 
 
