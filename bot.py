@@ -24,14 +24,17 @@ myInfo = privateAPI.get_user_info()
 print(myInfo)
 
 timeHelper = timeHelper.TimeHelper()
-
+timeHelper.time_last_bidOrder = time.localtime(time.time()-100000)
 while True:
     timeHelper.tick()
     if timeHelper.timeConnected() % 600 == 0:
         privateAPI.refresh_token()
 
+    print('next order: '+ 'after '+str((3600*24 - timeHelper.timeFromLastBidOrder())/3600) +'hours')
     if timeHelper.timeFromLastBidOrder() > 3600*24: # 매일 1회 5000원 매수
-        status = privateAPI.bid_order(bid_type='market',fiat_amount=5000, currency_pair='btc_krw')
+        #status = privateAPI.bid_order(bid_type='market',fiat_amount=5000, currency_pair='btc_krw')
+        status = privateAPI.bid_order(bid_type='limit', price=int(publicAPI.asks_orderbook()['bids'][0][0]),
+                                      coin_amount=0.001, currency_pair = 'btc_krw')
         timeHelper.record(ordertype='bid')
         print(timeHelper.printableLocalTime() + ' Bid order | Price: ' + publicAPI.ticker()['last'] + 'KRW/BTC | Amount: 5000KRW')
 
